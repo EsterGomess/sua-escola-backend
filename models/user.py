@@ -1,25 +1,36 @@
 from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
 from datetime import datetime
-from typing import Union
-import abc
-from  model import Base
 
+from sqlalchemy.orm import relationship, declared_attr
 
-class User(Base, abc.ABC):
+from  models import Base
+
+class User(Base):
     __abstract__ = True
 
-    created_at = Column(DateTime, default=datetime.now())
-    updated_at = Column(DateTime, default=datetime.now())
-    name = Column(String(100), nullable=False)
-    surname = Column(String(100), nullable=False)
-    address = Column(Integer, ForeignKey("adress.pk_adress"), nullable=False)
-    contact = Column(Integer, ForeignKey("contact.pk_contact"), nullable=True)
+    created_at= Column(DateTime, default=datetime.now())
+    updated_at= Column(DateTime, default=datetime.now())
 
-    def get_full_name(self) -> str:
-        return f"{self.name} {self.surname}"
+    @declared_attr
+    def name(cls):
+        return Column(String(100), nullable=False)
 
-    def get_address(self) -> Union[str, None]:
-        return self.address.get_full_address()
+    @declared_attr
+    def surname(cls):
+        return Column(String(100), nullable=False)
 
-    def get_contact(self) -> Union[str, None]:
-        return self.contact.get_full_contact()
+    @declared_attr
+    def address_id(cls):
+        return Column(Integer, ForeignKey("address.id"))
+
+    @declared_attr
+    def address(cls):
+        return relationship("Address")
+
+    @declared_attr
+    def contact_id(cls):
+        return Column(Integer, ForeignKey("contact.id"))
+
+    @declared_attr
+    def contact(cls):
+        return relationship("Contact")

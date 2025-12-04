@@ -9,7 +9,7 @@ class Address(Base):
     id = Column(Integer, primary_key=True)
     street = Column(String(100), nullable=False)
     number = Column(String(20), nullable=True)
-    district = Column(String(50), nullable=True)
+    district = Column(String(50), nullable=False)
     complement = Column(String(100), nullable=True)
     zip_code = Column(String, nullable=False)
     city = Column(String(50), nullable=False)

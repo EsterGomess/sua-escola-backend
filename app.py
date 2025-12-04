@@ -5,7 +5,7 @@ from flask import redirect
 from sqlalchemy.exc import IntegrityError
 
 from models import Student, Address, Contact, Guardian, Session
-from schemas import SchemaStudentView, SchemaStudentCreate
+from schemas import SchemaStudentView, SchemaStudentCreate, SchemaStudentQueryResponse, SchemaStudentQueryParam
 
 
 info = Info(title="Minha API", version="1.0.0")
@@ -86,6 +86,42 @@ def add_student(form: SchemaStudentCreate):
         session.rollback()
         logger.exception(f"Unexpect error : {e}")
         return {"message": "Was not possible created a new student :/"}, 400
+
+    finally:
+        session.close()
+
+
+@app.get('/student', tags=[student_tag], responses={"200": SchemaStudentQueryResponse})
+def get_student(query: SchemaStudentQueryParam):
+    """
+    Fetches student information by name using a query parameter.
+
+    Example: GET /student?name=John
+
+    :return: A tuple containing a list of student details or a message
+        if the student is not found, and an HTTP status code
+    :rtype: tuple
+    """
+
+    if not query.name:
+        return {"message": "Please provide a student name using the 'name' query parameter."}, 400
+
+    session = Session()
+    logger.debug("Initializing session")
+    try:
+        students = session.query(Student).filter(Student.name == query.name).all()
+
+        if not students:
+            logger.info(f"Student name {query.name} not found")
+            return {"message": "Student not found."}, 404
+
+        student_views = [SchemaStudentView.from_orm(s) for s in students]
+
+        return SchemaStudentQueryResponse(students=student_views).model_dump(), 200
+
+    except Exception as e:
+        logger.exception(f"Unexpected error: {e}")
+        return {"message": "Was not possible to get the student :/"}, 400
 
     finally:
         session.close()

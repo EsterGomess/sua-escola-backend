@@ -49,7 +49,6 @@ class SchemaStudentView(BaseModel):
         "from_attributes": True
     }
 
-
 class SchemaStudentCreate(BaseModel):
     """
     Defines a data model for creating a student entity.
@@ -79,3 +78,12 @@ class SchemaStudentCreate(BaseModel):
     model_config = {
         "from_attributes": True
     }
+
+class SchemaStudentQueryResponse(BaseModel):
+    students: List[SchemaStudentView] = []
+    model_config = {
+        "from_attributes": True
+    }
+
+class SchemaStudentQueryParam(BaseModel):
+    name: str

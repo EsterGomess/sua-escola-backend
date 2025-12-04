@@ -26,6 +26,25 @@ def home():
 
 @app.post('/student', tags=[student_tag], responses={"200": SchemaStudentView})
 def add_student(form: SchemaStudentCreate):
+    """
+    Handles the addition of a new student and their associated data to the database.
+
+    This function accepts a `SchemaStudentCreate` form, processes and validates the data,
+    and creates new instances of `Student`, `Address`, `Contact`, and `Guardian` records
+    based on the provided information. It also commits these records to the database.
+
+    In case of an error during the creation process, appropriate responses with
+    error messages are returned to inform about the failure. Specifically, it handles
+    `IntegrityError` for database constraints as well as any other unexpected exceptions.
+
+    :param form: The data schema containing details about the student, their guardians,
+        address, and contact information
+    :type form: SchemaStudentCreate
+    :return: A tuple containing the created student's data in dictionary form and the
+        HTTP status code 200 upon success, or an error message and corresponding HTTP
+        status code upon failure
+    :rtype: tuple[dict, int]
+    """
     session = Session()
     logger.debug("Inicializing session")
     try:

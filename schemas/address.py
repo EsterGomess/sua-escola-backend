@@ -22,9 +22,9 @@ class SchemaAddressCreate(BaseModel):
     :ivar country: The country where the address is located (optional).
     """
     street: str = Field(..., max_length=100,example="Rua das Flores")
-    number: Optional[str] = Field(None, max_length=20, example="104B")
+    number: Optional[str] = Field('', max_length=20, example="104B")
     district: str = Field(..., example="Center")
-    complement: Optional[str] = Field(None, max_length=100, example="apt 104")
+    complement: Optional[str] = Field('', max_length=100, example="apt 104")
     zip_code: str = Field(..., max_length=20,example="29877666")
     city: str = Field(..., max_length=100, example="São Paulo")
     state: str = Field(..., max_length=100, example="SP")
@@ -67,13 +67,13 @@ class SchemaAddressView(BaseModel):
     """
     id: int
     street: str = Field(..., example="Rua das Flores")
-    number: Optional[str] = None
+    number: Optional[str] = ''
     district: str = Field(..., example="Center")
     city: str = Field(..., example="Rio de Janeiro")
     state: str = Field(..., example="RJ")
     country: str = Field(..., example="Brazil")
     zip_code: str = Field(..., max_length=20,example="29877666")
-    complement: Optional[str] = None
+    complement: Optional[str] = ''
 
     model_config = {
         "from_attributes": True

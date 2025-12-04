@@ -1,0 +1,13 @@
+Flask
+Flask-Cors
+flask-openapi3
+Flask-SQLAlchemy
+nose2
+pydantic
+SQLAlchemy
+SQLAlchemy-Utils
+typing_extensions
+werkzeug
+black
+python-json-logger>=2.0.4
+ruff

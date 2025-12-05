@@ -116,3 +116,6 @@ class SchemaStudentUpdate(BaseModel):
     address: Optional[SchemaAddressUpdate] = {}
     contact: Optional[SchemaContactUpdate] = {}
     model_config = {"from_attributes": True}
+
+class SchemaStudentDeleteParam(BaseModel):
+    id: int

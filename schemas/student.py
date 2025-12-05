@@ -1,9 +1,10 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import List
+from typing import Optional
 
-from schemas.address import SchemaAddressCreate, SchemaAddressView
-from schemas.contact import SchemaContactCreate, SchemaContactView
+from schemas.address import SchemaAddressCreate, SchemaAddressView, SchemaAddressUpdate
+from schemas.contact import SchemaContactCreate, SchemaContactView, SchemaContactUpdate
 from schemas.guardian import SchemaGuardianCreate, SchemaGuardianView
 
 class SchemaStudentView(BaseModel):
@@ -87,3 +88,31 @@ class SchemaStudentQueryResponse(BaseModel):
 
 class SchemaStudentQueryParam(BaseModel):
     name: str
+
+class SchemaStudentUpdate(BaseModel):
+    """
+    Represents the schema for updating a student's information.
+
+    This class is designed to handle partial updates for a student's record
+    in a structured and validated manner. Each attribute corresponds to a
+    specific part of the student's information that can be updated. It uses
+    Pydantic's features to ensure type safety and data validation.
+
+    :ivar id: Unique identifier of the student.
+    :type id: int
+    :ivar name: The first name of the student, optional for update.
+    :type name: Optional[str]
+    :ivar surname: The last name of the student, optional for update.
+    :type surname: Optional[str]
+    :ivar address: Structured data for the updated address of the student.
+    :type address: Optional[SchemaAddressUpdate]
+    :ivar contact: Structured data for the updated contact information of
+                   the student.
+    :type contact: Optional[SchemaContactUpdate]
+    """
+    id: int
+    name: Optional[str]
+    surname: Optional[str]
+    address: Optional[SchemaAddressUpdate] = {}
+    contact: Optional[SchemaContactUpdate] = {}
+    model_config = {"from_attributes": True}

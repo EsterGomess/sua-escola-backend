@@ -56,3 +56,9 @@ class SchemaContactView(BaseModel):
     model_config = {
         "from_attributes": True
     }
+
+class SchemaContactUpdate(BaseModel):
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    whatsapp: Optional[str] = None
+    model_config = {"from_attributes": True}

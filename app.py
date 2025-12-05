@@ -9,7 +9,8 @@ from schemas import (SchemaStudentView,
                      SchemaStudentCreate,
                      SchemaStudentQueryResponse,
                      SchemaStudentQueryParam,
-                     SchemaStudentUpdate)
+                     SchemaStudentUpdate,
+                     SchemaStudentDeleteParam)
 
 info = Info(title="Minha API", version="1.0.0")
 app = OpenAPI(__name__, info=info)
@@ -215,3 +216,36 @@ def update_student(form: SchemaStudentUpdate):
 
     finally:
         session.close()
+
+
+
+@app.delete('/student', tags=[student_tag],
+            responses={"200": {"description": "Student deleted successfully"}})
+def delete_student(query: SchemaStudentDeleteParam):
+    """
+    Deletes a student by ID.
+
+    - **student_id**: Required, the ID of the student to delete.
+
+    Returns a success message if the student is deleted, or 404 if the student does not exist.
+    """
+    if not query.id:
+        return {"message": "Please provide a student id using the 'id' query parameter."}, 400
+    session = Session()
+    try:
+        student = session.query(Student).filter(Student.id == query.id).first()
+        if not student:
+            return {"message": "Student not found."}, 404
+
+        session.delete(student)
+        session.commit()
+        return {"message": f"Student with id {student.id} deleted successfully."}, 200
+
+    except Exception as e:
+        session.rollback()
+        logger.exception(f"Unexpected error while deleting student: {e}")
+        return {"message": "Was not possible to delete the student :/"}, 400
+
+    finally:
+        session.close()
+

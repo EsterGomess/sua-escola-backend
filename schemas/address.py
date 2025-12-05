@@ -78,3 +78,15 @@ class SchemaAddressView(BaseModel):
     model_config = {
         "from_attributes": True
     }
+
+class SchemaAddressUpdate(BaseModel):
+    street: Optional[str] = None
+    number: Optional[str] = None
+    district: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    zip_code: Optional[str] = None
+    complement: Optional[str] = None
+
+    model_config = {"from_attributes": True}

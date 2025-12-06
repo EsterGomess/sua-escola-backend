@@ -52,7 +52,6 @@ class SchemaGuardianView(BaseModel):
     id: int
     name: str = Field(..., example="João")
     surname: str = Field(..., example="Silva")
-    relationship: Optional[str] = None
     phone: Optional[str] = None
 
 

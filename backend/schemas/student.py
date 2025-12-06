@@ -3,9 +3,9 @@ from datetime import datetime
 from typing import List
 from typing import Optional
 
-from schemas.address import SchemaAddressCreate, SchemaAddressView, SchemaAddressUpdate
-from schemas.contact import SchemaContactCreate, SchemaContactView, SchemaContactUpdate
-from schemas.guardian import SchemaGuardianCreate, SchemaGuardianView
+from backend.schemas.address import SchemaAddressCreate, SchemaAddressView, SchemaAddressUpdate
+from backend.schemas.contact import SchemaContactCreate, SchemaContactView, SchemaContactUpdate
+from backend.schemas.guardian import SchemaGuardianCreate, SchemaGuardianView
 
 class SchemaStudentView(BaseModel):
     """

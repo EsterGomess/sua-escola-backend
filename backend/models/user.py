@@ -3,7 +3,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import relationship, declared_attr
 
-from  models import Base
+from backend.models import Base
 
 class User(Base):
     __abstract__ = True

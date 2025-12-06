@@ -3,13 +3,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
 
-from models.base import Base
-from models.address import Address
-from models.contact import Contact
-from models.guardian import Guardian
-from models.student import Student
-from models.association import student_guardian
-from models.user import User
+from backend.models.base import Base
+from backend.models.address import Address
+from backend.models.contact import Contact
+from backend.models.guardian import Guardian
+from backend.models.student import Student
+from backend.models.association import student_guardian
+from backend.models.user import User
 db_path = "database/"
 
 if not os.path.exists(db_path):

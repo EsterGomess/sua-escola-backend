@@ -1,18 +1,18 @@
-from logger import logger
+from backend.logger import logger
 from flask_cors import CORS
 from flask_openapi3 import OpenAPI, Info, Tag
 from flask import redirect
 from sqlalchemy.exc import IntegrityError
 
-from services import  (delete_student_by_id,
-                       update_student_by_id,
-                       create_student,
-                       get_students)
-from schemas import (SchemaStudentView,
-                     SchemaStudentCreate,
-                     SchemaStudentQueryParam,
-                     SchemaStudentUpdate,
-                     SchemaStudentDeleteParam)
+from backend.services import  (delete_student_by_id,
+                               update_student_by_id,
+                               create_student,
+                               get_students)
+from backend.schemas import (SchemaStudentView,
+                             SchemaStudentCreate,
+                             SchemaStudentQueryParam,
+                             SchemaStudentUpdate,
+                             SchemaStudentDeleteParam)
 
 info = Info(title="Minha API", version="1.0.0")
 app = OpenAPI(__name__, info=info)

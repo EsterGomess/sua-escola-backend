@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer,  String
 
-from models import Base
+from backend.models import Base
 
 
 class Address(Base):

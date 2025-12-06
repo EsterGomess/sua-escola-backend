@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional
-from schemas.address import SchemaAddressCreate
-from schemas.contact import SchemaContactCreate
+from backend.schemas.address import SchemaAddressCreate
+from backend.schemas.contact import SchemaContactCreate
 
 class SchemaGuardianCreate(BaseModel):
     """

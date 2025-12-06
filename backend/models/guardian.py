@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer
 
 from sqlalchemy.orm import relationship
-from models.association import student_guardian
+from backend.models.association import student_guardian
 from .user import User
 
 class Guardian(User):

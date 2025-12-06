@@ -9,7 +9,7 @@ try:
 except Exception:
     JSONLOGGER_AVAILABLE = False
 
-LOG_PATH = os.getenv("LOG_PATH", "log")
+LOG_PATH = os.getenv("LOG_PATH", "../log")
 LOG_JSON = os.getenv("LOG_JSON", "true").lower() in ("1", "true", "yes")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 

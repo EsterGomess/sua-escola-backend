@@ -1,4 +1,4 @@
-from models import Student, Guardian, Address, Contact, Session
+from backend.models import Student, Guardian, Address, Contact, Session
 from sqlalchemy.exc import IntegrityError
 from typing import Tuple, List, Optional, Dict
 from sqlalchemy.orm import joinedload

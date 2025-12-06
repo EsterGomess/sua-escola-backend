@@ -81,13 +81,38 @@ class SchemaStudentCreate(BaseModel):
     }
 
 class SchemaStudentQueryResponse(BaseModel):
+    """
+    Represents a response model for querying student data.
+
+    This class encapsulates the details of a student query response, where
+    multiple student views can be stored. It is designed to provide a
+    structured way to manage and interact with student data in the context
+    of a query response.
+
+    :ivar students: List of student views returned as a result of the query.
+    :type students: List[SchemaStudentView]
+    """
     students: List[SchemaStudentView] = []
     model_config = {
         "from_attributes": True
     }
 
 class SchemaStudentQueryParam(BaseModel):
-    name: str
+    """
+    Represents a schema for query parameters related to a student.
+
+    This class is intended to define the structure and validation
+    of query parameters that can be used to filter or query student
+    data. It leverages Pydantic's BaseModel for validation and type
+    definition.
+
+    :ivar id: Represents the optional unique identifier of a student.
+    :type id: Optional[int]
+    :ivar name: Represents the optional name of a student.
+    :type name: Optional[str]
+    """
+    id: Optional[int] = Field(None, example=123)
+    name: Optional[str] = Field(None, example="Ana")
 
 class SchemaStudentUpdate(BaseModel):
     """
@@ -111,11 +136,23 @@ class SchemaStudentUpdate(BaseModel):
     :type contact: Optional[SchemaContactUpdate]
     """
     id: int
-    name: Optional[str]
-    surname: Optional[str]
-    address: Optional[SchemaAddressUpdate] = {}
-    contact: Optional[SchemaContactUpdate] = {}
+    name: Optional[str] = None
+    surname: Optional[str] = None
+    address: Optional[SchemaAddressUpdate] = None
+    contact: Optional[SchemaContactUpdate] = None
+    guardians: Optional[SchemaGuardianCreate] = None
     model_config = {"from_attributes": True}
 
 class SchemaStudentDeleteParam(BaseModel):
+    """
+    Represents the structure for deletion parameters of a student.
+
+    This class is used as a model for defining the required parameters
+    when attempting to delete a student's record. It enforces strict
+    typing and validation of the `id` attribute, which represents the
+    unique identifier of the student to be deleted.
+
+    :ivar id: Unique identifier of the student to be deleted.
+    :type id: int
+    """
     id: int

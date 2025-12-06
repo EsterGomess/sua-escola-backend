@@ -3,11 +3,12 @@ from flask_cors import CORS
 from flask_openapi3 import OpenAPI, Info, Tag
 from flask import redirect
 from sqlalchemy.exc import IntegrityError
-
-from models import Student, Address, Contact, Guardian, Session
+from services import  (delete_student_by_id,
+                       update_student_by_id,
+                       create_student,
+                       get_students)
 from schemas import (SchemaStudentView,
                      SchemaStudentCreate,
-                     SchemaStudentQueryResponse,
                      SchemaStudentQueryParam,
                      SchemaStudentUpdate,
                      SchemaStudentDeleteParam)
@@ -20,7 +21,6 @@ home_tag = Tag(name="Documentação", description="Seleção de documentação: 
 student_tag = Tag(name="Student", description="Addition, viewing, and removal of students in the database")
 
 
-
 @app.get('/', tags=[home_tag])
 def home():
     """Redireciona para /openapi, tela que permite a escolha do estilo de documentação.
@@ -29,223 +29,207 @@ def home():
 
 
 @app.post('/student', tags=[student_tag],
-          responses={"200": SchemaStudentView})
+          responses={"201": SchemaStudentView,
+                     "400": {"description": "Invalid data or unexpected error."},
+                     "409": {"description": ""},
+                     })
 def add_student(form: SchemaStudentCreate):
     """
-    Handles the addition of a new student and their associated data to the database.
+    Creates a new student entry from the provided form data and returns the corresponding
+    student details, along with associated links for further interactions.
 
-    This function accepts a `SchemaStudentCreate` form, processes and validates the data,
-    and creates new instances of `Student`, `Address`, `Contact`, and `Guardian` records
-    based on the provided information. It also commits these records to the database.
+    This function processes the user-provided form input, validates it, and attempts
+    to create a new student record in the database. Upon successful creation, it builds
+    a response containing the newly created student's details, relevant links for
+    resource navigation, and header metadata.
 
-    In case of an error during the creation process, appropriate responses with
-    error messages are returned to inform about the failure. Specifically, it handles
-    `IntegrityError` for database constraints as well as any other unexpected exceptions.
-
-    :param form: The data schema containing details about the student, their guardians,
-        address, and contact information
+    :param form: The form data required for creating a student, validated via SchemaStudentCreate.
     :type form: SchemaStudentCreate
-    :return: A tuple containing the created student's data in dictionary form and the
-        HTTP status code 200 upon success, or an error message and corresponding HTTP
-        status code upon failure
-    :rtype: tuple[dict, int]
+    :return: A tuple containing:
+             - A JSON-formatted response with the newly created student's details and related links
+             - HTTP status code (either 201, 400, or 409)
+             - Relevant headers for the response
+    :rtype: tuple
     """
-    session = Session()
-    logger.debug("Inicializing session")
     try:
-        student_address = Address(**form.address.dict())
-        student_contact = Contact(**form.contact.dict())
+        payload = form.model_dump()
+        success, msg, student = create_student(payload)
+        if not success:
+            return {"message": msg}, 400 if "Required" in msg or "Integrity" in msg else 409
 
-        guardians_objs = []
-        for gd in form.guardians:
-            gd_address = Address(**gd.address.dict())
-            gd_contact = Contact(**gd.contact.dict())
-
-            guardian_obj = Guardian(
-                name=gd.name,
-                surname=gd.surname,
-                address=gd_address,
-                contact=gd_contact,
-            )
-
-            logger.debug("Created guardian:", guardian_obj)
-            guardians_objs.append(guardian_obj)
-
-        student = Student(
-            name=form.name,
-            surname=form.surname,
-            address=student_address,
-            contact=student_contact,
-            guardians=guardians_objs,
-        )
-
-        session.add(student)
-        session.commit()
-        session.refresh(student)
-
-        return SchemaStudentView.from_orm(student).dict(), 200
-
-    except IntegrityError as e:
-        session.rollback()
-        error_msg = str(e.orig)
-
-        if "NOT NULL constraint failed" in error_msg:
-            field = error_msg.split(":")[-1].strip()
-            logger.warning(f"NOT NULL constraint failed {error_msg} ")
-            return {
-                "message": f"Required field missing: {field}"
-            }, 400
-
-        if "UNIQUE constraint failed" in error_msg:
-            logger.warning(f"UNIQUE constraint failed {error_msg} ")
-            return {
-                "message": "A record with this unique data already exists."
-            }, 409
-
-        return {
-            "message": f"Integrity error: {error_msg}"
-        }, 400
-
+        body = SchemaStudentView.from_orm(student).model_dump()
+        body["_links"] = {
+            "self": {"href": f"/student?id={student.id}"},
+            "get": {"href": f"/student?name={student.name}"},
+            "docs": {"href": "/openapi"}
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Link": '</openapi>; rel="service-doc"'
+        }
+        return body, 201, headers
     except Exception as e:
-        session.rollback()
-        logger.exception(f"Unexpect error : {e}")
-        return {"message": "Was not possible created a new student :/"}, 400
-
-    finally:
-        session.close()
+        logger.exception(f"Unexpected error while creating student: {e}")
+        return {"message":"Invalid data or unexpected error."}, 400
 
 
 @app.get('/student', tags=[student_tag],
-         responses={"200": SchemaStudentQueryResponse})
+         responses={
+             "200": {"description": "Student(s) retrieved successfully."},
+             "404": {"description": "Student not found."},
+             "400": {"description": "Invalid query or retrieval failure."},
+
+         })
 def get_student(query: SchemaStudentQueryParam):
     """
-    Fetches student information by name using a query parameter.
+    Retrieves student information based on provided query parameters. The endpoint
+    requires at least one of the following query parameters: id, name, or surname.
+    If no query parameters are provided, a 400 Bad Request status is returned. The
+    function attempts to retrieve the student(s) based on the filters specified.
+    If retrieval is successful, it returns the student data, including hypermedia
+    links for navigation. Else, it returns appropriate status and message.
 
-    Example: GET /student?name=John
+    :param query: Query parameters for filtering student records. Should include at
+        least one of the following: id, name, or surname.
+    :type query: SchemaStudentQueryParam
+    :return: A list of student records if retrieval is successful, with each record
+        containing hypermedia links. Appropriate HTTP status codes and error
+        messages returned in case of failure.
+    :rtype: tuple or JSON
+    """
+    if not (query.id or query.name or query.surname):
+        return {"message": "Provide at least one query parameter (id, name or surname)."}, 400
 
-    :return: A tuple containing a list of student details or a message
-        if the student is not found, and an HTTP status code
+    try:
+        filters = query.model_dump()
+        success, msg, students = get_students(filters)
+        if not success:
+            return {"message": msg}, 404
+
+        body = []
+        for s in students:
+            item = SchemaStudentView.from_orm(s).model_dump()
+            item["_links"] = {
+                "self": {"href": f"/student?id={s.id}"},
+                "list": {"href": "/student"},
+                "docs": {"href": "/openapi"}
+            }
+            body.append(item)
+
+        headers = {
+            "Content-Type": "application/json",
+            "Link": '</openapi>; rel="service-doc"'
+        }
+        return body, 200, headers
+
+    except Exception as e:
+        logger.exception(f"Unexpected error while retrieving student(s): {e}")
+        return {"message": "Invalid query or retrieval failure."}, 400
+
+
+@app.patch('/student', tags=[student_tag],
+         responses={"200": SchemaStudentView,
+                    "404": {"description": "Student not found."},
+                    "400": {"description": "Invalid input or update failure."},
+                    "409": {"description": "Integrity constraint violated."}})
+def update_student(form: SchemaStudentUpdate):
+    """
+    Updates the information of an existing student based on the provided data.
+    This API endpoint allows partial updates for a student's record, utilizing
+    the fields included in the request form. Error handling is performed
+    to manage possible violations, unavailability of record, or invalid data.
+
+    :param form: An instance of SchemaStudentUpdate containing the partial update
+        data for the student.
+    :type form: SchemaStudentUpdate
+
+    :return: A tuple consisting of the updated student information, HTTP status
+        code, and any necessary headers. If the update is successful, the status
+        code will be 200 and the body will contain the updated student details.
+        In case of failure, an appropriate HTTP error status code and message will
+        be included.
+    :rtype: tuple
+    """
+    try:
+        update_payload = form.model_dump(exclude_none=True)
+
+        success, msg, student = update_student_by_id(form.id, update_payload)
+        if not success:
+            return {"message": msg}, 404
+
+        body = SchemaStudentView.from_orm(student).model_dump()
+        body["_links"] = {
+            "self": {"href": f"/student?id={student.id}"},
+            "get": {"href": f"/student?name={student.name}"},
+            "docs": {"href": "/openapi"}
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Link": '</openapi>; rel="service-doc"'
+        }
+        return body, 200, headers
+
+    except IntegrityError as e:
+        logger.warning(f"Integrity error while updating student: {e}")
+        return {"message": "Integrity constraint violated."}, 409
+
+    except Exception as e:
+        logger.exception(f"Unexpected error while updating student: {e}")
+        return {"message": "Invalid input or update failure."}, 400
+
+
+@app.delete('/student',
+            tags=[student_tag],
+            responses={
+                "200": {"description": "Student deleted successfully."},
+                "404": {"description": "Student not found."},
+                "400": {"description": "Invalid or missing student ID, or deletion failure."},
+            }
+            )
+def delete_student(query: SchemaStudentDeleteParam):
+    """
+    Deletes a student record by student ID.
+
+    This function handles deletion of a student record based on the provided ID. It
+    validates the presence of the ID, attempts the deletion, and returns appropriate
+    responses based on the operation outcome. The response includes message details
+    and supplementary link headers for additional API documentation references.
+
+    :param query: The parameters required for deleting a student, encapsulated in
+        the SchemaStudentDeleteParam object. The ID within the query must be valid
+        and provided.
+    :type query: SchemaStudentDeleteParam
+    :return: A tuple containing the response body, HTTP status code, and optional
+        headers:
+        - Successful deletion: HTTP 200 with a JSON message body and linking headers.
+        - Not found: HTTP 404 with an error message.
+        - Invalid or missing student ID, or unexpected failure: HTTP 400 with an
+          error message.
     :rtype: tuple
     """
 
-    if not query.name:
-        return {"message": "Please provide a student name using the 'name' query parameter."}, 400
-
-    session = Session()
-    logger.debug("Initializing session")
-    try:
-        students = session.query(Student).filter(Student.name == query.name).all()
-
-        if not students:
-            logger.info(f"Student name {query.name} not found")
-            return {"message": "Student not found."}, 404
-
-        student_views = [SchemaStudentView.from_orm(s) for s in students]
-
-        return SchemaStudentQueryResponse(students=student_views).model_dump(), 200
-
-    except Exception as e:
-        logger.exception(f"Unexpected error: {e}")
-        return {"message": "Was not possible to get the student :/"}, 400
-
-    finally:
-        session.close()
-
-
-@app.put('/student', tags=[student_tag],
-         responses={"200": SchemaStudentView})
-def update_student(form: SchemaStudentUpdate):
-    """
-    Updates a student's information.
-
-    Allows updating the student's name, surname, address, contact, and adding new guardians.
-
-    - **id**: Required, identifies which student to update.
-    - **name**: Optional, new student name.
-    - **surname**: Optional, new student surname.
-    - **address**: Optional, new address fields.
-    - **contact**: Optional, new contact fields.
-    - **guardians**: Optional, list of new guardians to add.
-
-    Example payload:
-    ```json
-    {
-        "id": 1,
-        "name": "João",
-        "surname": "Pereira",
-        "address": {
-            "street": "Rua Nova",
-            "city": "São Paulo"
-        },
-        "contact": {
-            "phone": "+551199999999"
-        }
-    }
-    ```
-    """
-    session = Session()
-    try:
-        student = session.query(Student).filter(Student.id == form.id).first()
-        if not student:
-            return {"message": "Student not found."}, 404
-
-        if form.name is not None:
-            student.name = form.name
-        if form.surname is not None:
-            student.surname = form.surname
-
-        if form.address:
-            for field, value in form.address.model_dump().items():
-                if value is not None:
-                    setattr(student.address, field, value)
-
-        if form.contact:
-            for field, value in form.contact.model_dump().items():
-                if value is not None:
-                    setattr(student.contact, field, value)
-
-        session.commit()
-        session.refresh(student)
-
-        return SchemaStudentView.from_orm(student).model_dump(), 200
-
-    except Exception as e:
-        session.rollback()
-        logger.exception(f"Unexpected error while updating student: {e}")
-        return {"message": "Was not possible to update the student :/"}, 400
-
-    finally:
-        session.close()
-
-
-
-@app.delete('/student', tags=[student_tag],
-            responses={"200": {"description": "Student deleted successfully"}})
-def delete_student(query: SchemaStudentDeleteParam):
-    """
-    Deletes a student by ID.
-
-    - **student_id**: Required, the ID of the student to delete.
-
-    Returns a success message if the student is deleted, or 404 if the student does not exist.
-    """
     if not query.id:
-        return {"message": "Please provide a student id using the 'id' query parameter."}, 400
-    session = Session()
-    try:
-        student = session.query(Student).filter(Student.id == query.id).first()
-        if not student:
-            return {"message": "Student not found."}, 404
+        return {"message": "Invalid or missing student ID, or deletion failure."}, 400
 
-        session.delete(student)
-        session.commit()
-        return {"message": f"Student with id {student.id} deleted successfully."}, 200
+    try:
+        success, msg = delete_student_by_id(query.id)
+        if not success:
+            return {"message": msg}, 404
+
+        body = {
+            "message": msg,
+            "_links": {
+                "self": {"href": f"/student?id={query.id}"},
+                "docs": {"href": "/openapi"},
+            }
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Link": '</openapi>; rel="service-doc"'
+        }
+        return body, 200, headers
 
     except Exception as e:
-        session.rollback()
         logger.exception(f"Unexpected error while deleting student: {e}")
-        return {"message": "Was not possible to delete the student :/"}, 400
-
-    finally:
-        session.close()
+        return {"message": "Invalid or missing student ID, or deletion failure."}, 400
 

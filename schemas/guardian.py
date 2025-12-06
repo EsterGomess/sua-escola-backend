@@ -5,23 +5,14 @@ from schemas.contact import SchemaContactCreate
 
 class SchemaGuardianCreate(BaseModel):
     """
-    Represents a schema for creating a new guardian entity.
+    👪 Guardian creates schema
 
-    This class contains the necessary information to define a guardian, including
-    personal details, address, and contact information. It is used as part of
-    validation and data structure representation when creating a guardian record.
-
-    :ivar name: The first name of the guardian.
-    :type name: str
-    :ivar surname: The last name of the guardian.
-    :type surname: str
-    :ivar address: The address details of the guardian.
-    :type address: SchemaAddressCreate
-    :ivar contact: The contact details of the guardian.
-    :type contact: SchemaContactCreate
+    Schema used when creating a guardian. Includes personal details,
+    address and contact information. Designed for validation and
+    clear API documentation.
     """
-    name: str = Field(..., example="João")
-    surname: str = Field(..., example="Silva")
+    name: str = Field(..., json_schema_extra={"example": "John"})
+    surname: str = Field(..., json_schema_extra={"example": "Doe"})
     address: SchemaAddressCreate
     contact: SchemaContactCreate
 
@@ -29,33 +20,18 @@ class SchemaGuardianCreate(BaseModel):
         "from_attributes": True
     }
 
+
 class SchemaGuardianView(BaseModel):
     """
-    Represents a view model for a guardian schema entity.
+    🧾 Guardian view schema
 
-    Provides a structured way to handle the representation of
-    guardian information in the system, ensuring consistency and
-    validations.
-
-    :ivar id: Unique identifier for the guardian entity.
-    :type id: int
-    :ivar name: First name of the guardian.
-    :type name: str
-    :ivar surname: Surname of the guardian.
-    :type surname: str
-    :ivar relationship: The relationship of the guardian to the entity they are responsible for
-        (e.g., parent, legal guardian). This field is optional.
-    :type relationship: Optional[str]
-    :ivar phone: Contact phone number of the guardian. This field is optional.
-    :type phone: Optional[str]
+    Representation returned by the API for a guardian.
     """
-    id: int
-    name: str = Field(..., example="João")
-    surname: str = Field(..., example="Silva")
-    phone: Optional[str] = None
-
+    id: int = Field(..., description="Unique guardian id", json_schema_extra={"example": 1})
+    name: str = Field(..., json_schema_extra={"example": "John"})
+    surname: str = Field(..., json_schema_extra={"example": "Doe"})
+    phone: Optional[str] = Field(None, json_schema_extra={"example": "+1-202-555-0123"})
 
     model_config = {
         "from_attributes": True
     }
-

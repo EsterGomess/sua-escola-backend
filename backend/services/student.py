@@ -96,8 +96,13 @@ def create_student(data: dict):
         student_address = Address(**data["address"])
         student_contact = Contact(**data["contact"])
 
+        if isinstance(data["guardians"], dict):
+            guardians_list = [data["guardians"]]
+        else:
+            guardians_list = data["guardians"]
+
         guardians_objs = []
-        for gd in data.get("guardians", []):
+        for gd in guardians_list:
             gd_address = Address(**gd["address"])
             gd_contact = Contact(**gd["contact"])
             guardian_obj = Guardian(

@@ -18,7 +18,7 @@ class SchemaAddressCreate(BaseModel):
     zip_code: str = Field(..., max_length=20, json_schema_extra={"example": "29877666"})
     city: str = Field(..., max_length=100, json_schema_extra={"example": "São Paulo"})
     state: str = Field(..., max_length=100, json_schema_extra={"example": "SP"})
-    country: Optional[str] = Field(None, max_length=100, json_schema_extra={"example": "Brazil"})
+    country: str = Field(..., max_length=100, json_schema_extra={"example": "Brazil"})
 
     model_config = {
         "from_attributes": True
@@ -37,7 +37,7 @@ class SchemaAddressView(BaseModel):
     district: str = Field(..., json_schema_extra={"example": "Center"})
     city: str = Field(..., json_schema_extra={"example": "Rio de Janeiro"})
     state: str = Field(..., json_schema_extra={"example": "RJ"})
-    country: Optional[str] = Field(None, json_schema_extra={"example": "Brazil"})
+    country: str = Field(..., json_schema_extra={"example": "Brazil"})
     zip_code: str = Field(..., max_length=20, json_schema_extra={"example": "29877666"})
     complement: Optional[str] = Field(None, json_schema_extra={"example": "apt 104"})
 

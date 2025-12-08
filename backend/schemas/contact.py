@@ -26,7 +26,8 @@ class SchemaContactView(BaseModel):
     """
     id: int
     email: Optional[str] = Field(None, json_schema_extra={"example": "user@example.com"})
-    phone: Optional[str] = Field(None, json_schema_extra={"example": "987654321"})
+    ddd: int = Field(..., json_schema_extra={"example": 11})
+    phone: str = Field(..., json_schema_extra={"example": "987654321"})
     whatsapp: Optional[str] = Field(None, json_schema_extra={"example": "+5511987654321"})
 
     model_config = {

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import List
+from typing import List, Union
 from typing import Optional
 
 from backend.schemas.address import SchemaAddressCreate, SchemaAddressView, SchemaAddressUpdate
@@ -74,7 +74,7 @@ class SchemaStudentCreate(BaseModel):
     surname: str = Field(..., json_schema_extra={"example": "Costa"})
     address: SchemaAddressCreate
     contact: SchemaContactCreate
-    guardians: List[SchemaGuardianCreate]
+    guardians: Union[SchemaGuardianCreate, List[SchemaGuardianCreate]]
 
     model_config = {
         "from_attributes": True

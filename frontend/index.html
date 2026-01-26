@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="pt-BR" >
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons  -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="styles/style.css">
+
+    <title>Sua Escola</title>
+
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<!-- INLINE TEMPLATES -->
+<template id="tmpl-personal-data">
+    <div class="mb-2"><small class="text-muted">Personal Dataaa</small></div>
+    <div class="row g-3 mt-1">
+        <div class="col-md-6">
+            <label class="form-label">Name</label>
+
+            <input name="name" class="form-control"/>
+
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Surname</label>
+
+            <input name="surname" class="form-control"/>
+
+        </div>
+    </div>
+    <hr>
+</template>
+
+<template id="tmpl-address">
+    <div class="mb-2"><small class="text-muted">Address</small></div>
+    <div class="row g-3 mt-1">
+        <div class="col-md-6">
+            <label class="form-label">Street</label>
+            <input class="form-control" name="street">
+
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Number</label>
+            <input class="form-control" name="number">
+
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">City</label>
+            <input class="form-control" name="city">
+
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">District</label>
+            <input class="form-control" name="district">
+
+        </div>
+        <div class="col-md-5">
+            <label class="form-label">Complement (Optional)</label>
+            <input class="form-control" name="complement">
+
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Zipcode</label>
+            <input class="form-control" name="zip_code">
+
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">State</label>
+            <input class="form-control" name="state">
+
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Country</label>
+            <input class="form-control" name="country">
+
+        </div>
+    </div>
+    <hr>
+</template>
+
+<template id="tmpl-contact">
+    <div class="mb-2"><small class="text-muted">Contact</small></div>
+    <div class="row g-3 mt-1">
+        <div class="col-md-1">
+            <label class="form-label">DDD</label>
+            <input class="form-control" name="ddd">
+
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Phone</label>
+            <input class="form-control" name="phone">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">WhatsApp (Optional)</label>
+            <input class="form-control" name="whatsapp">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Email (Optional)</label>
+            <input class="form-control" name="email">
+        </div>
+    </div>
+    <hr>
+</template>
+
+<template id="tmpl-guardian-full">
+    <div class="guardian-full border rounded p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong>Guardian</strong>
+            <button type="button" class="btn btn-sm btn-outline-danger btn-remove-guardian">Remove</button>
+        </div>
+
+        <div class="row g-3">
+            <!-- guardian personal data -->
+            <div class="col-12 guardian-personal-container"></div>
+
+            <!-- address for guardian -->
+            <div class="col-12 guardian-address-container"></div>
+
+            <!-- contact for guardian -->
+            <div class="col-12 guardian-contact-container"></div>
+        </div>
+    </div>
+</template>
+
+<header class="bg-dark text-light py-3">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="mb-0">Sua Escola</h4>
+            <small class="text-muted">Student Management</small>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="input-group" style="width: 250px;">
+                <label>
+                    <input type="search" class="form-control" placeholder="Search student...">
+                </label>
+                <span class="input-group-text bg-dark text-light">
+                    <i class="bi bi-search"></i>
+                </span>
+            </div>
+            <div>
+                <button id="btnOpenAdd" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container my-4" id="main">
+    <!-- Student list will be rendered here -->
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Students List</h5>
+            <small id="studentsCount" class="text-muted">0 students</small>
+        </div>
+
+        <div id="studentsList" class="row g-3">
+            <!-- list inserted here -->
+
+        </div>
+
+        <div id="emptyState" class="text-center text-muted my-5" style="display:none;">
+            <p class="mb-2">No student found.</p>
+            <button class="btn btn-outline-primary" id="emptyAdd">Add first student</button>
+        </div>
+    </section>
+</main>
+
+<!-- Add Student Modal -->
+<div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add student</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="studentForm">
+                    <input type="hidden" name="id">
+                    <div class="row g-3">
+                        <div id="personal-block"></div>
+                        <div id="address-block"></div>
+                        <div id="contact-block"></div>
+                        <div class="col-12 d-flex justify-content-between align-items-center">
+                            <strong>Guardians</strong>
+                            <button id="btnAddGuardian" type="button" class="btn btn-sm btn-outline-secondary">Add
+                                guardian
+                            </button>
+                        </div>
+                        <div id="guardians-block" class="col-12"></div>
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="btnSaveStudent" type="button" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- O footer agora fica sempre no final -->
+<footer class="bg-dark text-light text-center py-3 mt-auto">
+    <div class="text-center py-3 border-top">
+        <small>Make with ❤️ by Ester</small>
+        <br>
+        <a href="https://www.flaticon.com/br/icones-gratis/educacao" title="educação ícones">
+            Educação ícones criados por Freepik - Flaticon
+        </a>
+    </div>
+</footer>
+
+<!-- Bootstrap JS Bundle (includes Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Frontend logic: localStorage-backed students list (works with file://)
+    (function () {
+        const KEY = 'suaescola_students_v1';
+        const addModal = new bootstrap.Modal(document.getElementById('addStudentModal'));
+
+        // helper to clone a template into a target container
+        function cloneInto(templateId, targetId) {
+            const tmpl = document.getElementById(templateId);
+            const target = document.getElementById(targetId);
+            if (!tmpl || !target) return;
+            // Using innerHTML is simpler and more reliable for templates inserted into the DOM (keeps names and structure)
+            target.innerHTML = tmpl.innerHTML;
+        }
+
+        // javascript
+        async function tryLoadExternalTemplates() {
+            // Não tente fetch quando aberto via file:// (bloqueios CORS)
+            if (location.protocol === 'file:') {
+                console.info('Executando via file:// — usando templates inline (sem fetch).');
+                return;
+            }
+            try {
+                const resp = await fetch('templates/templates_blocks.html');
+                if (!resp.ok) {
+                    console.info('Nenhum templates externo encontrado:', resp.status);
+                    return;
+                }
+                const html = await resp.text();
+                const tmp = document.createElement('div');
+                tmp.innerHTML = html;
+                // anexa somente templates que ainda não existam no documento
+                tmp.querySelectorAll('template[id]').forEach(t => {
+                    if (!document.getElementById(t.id)) {
+                        document.body.appendChild(t);
+                    }
+                });
+            } catch (err) {
+                console.warn('Falha ao carregar templates externos:', err);
+            }
+        }
+
+        // Add a guardian row to guardians-block. vals = {name, surname}
+        function addGuardianRow(vals = {}) {
+            // vals may contain: name, surname, address: {...}, contact: {...}
+            const tmpl = document.getElementById('tmpl-guardian-full');
+            const container = document.getElementById('guardians-block');
+            if (!tmpl || !container) return;
+            const frag = tmpl.content.cloneNode(true);
+            container.appendChild(frag);
+            // the appended node is the last child (guardian-full)
+            const added = container.lastElementChild;
+            if (!added) return;
+            // Inject personal template into this guardian (reuse tmpl-personal-data)
+            const personalTpl = document.getElementById('tmpl-personal-data');
+            const personalTarget = added.querySelector('.guardian-personal-container');
+            if (personalTpl && personalTarget) {
+                personalTarget.innerHTML = personalTpl.innerHTML;
+                // map personal input names to data-field (name, surname) and remove name attribute to avoid collisions
+                personalTarget.querySelectorAll('input[name]').forEach(inp => {
+                    const n = inp.getAttribute('name');
+                    if (n) {
+                        inp.setAttribute('data-field', n);
+                        inp.removeAttribute('name');
+                    }
+                });
+            }
+
+            // Inject contact template into this guardian (reuse tmpl-contact)
+            const contactTpl = document.getElementById('tmpl-contact');
+            const contactTarget = added.querySelector('.guardian-contact-container');
+            if (contactTpl && contactTarget) {
+                contactTarget.innerHTML = contactTpl.innerHTML;
+                // map input name attributes to data-field so population/selectors work uniformly
+                contactTarget.querySelectorAll('input[name]').forEach(inp => {
+                    const n = inp.getAttribute('name');
+                    if (n) {
+                        inp.setAttribute('data-field', n);
+                        inp.removeAttribute('name');
+                    }
+                });
+            }
+            // Inject address template into this guardian (reuse tmpl-address)
+            const addressTpl = document.getElementById('tmpl-address');
+            const addressTarget = added.querySelector('.guardian-address-container');
+            if (addressTpl && addressTarget) {
+                addressTarget.innerHTML = addressTpl.innerHTML;
+                // If injecting into a guardian container we already show an 'Address' small above the container, remove duplicate
+                const titleEl = addressTarget.querySelector('.mb-2');
+                if (titleEl) titleEl.remove();
+                // map input name attributes to data-field for address as well
+                addressTarget.querySelectorAll('input[name]').forEach(inp => {
+                    const n = inp.getAttribute('name');
+                    if (n) {
+                        inp.setAttribute('data-field', n);
+                        inp.removeAttribute('name');
+                    }
+                });
+            }
+
+            // populate fields by data-field (personal, address, contact)
+            Object.entries(vals || {}).forEach(([k, v]) => {
+                if (k === 'address' && v && typeof v === 'object') {
+                    Object.entries(v).forEach(([ak, av]) => {
+                        const inp = added.querySelector(`[data-field="${ak}"]`);
+                        if (inp) inp.value = av || '';
+                    });
+                } else if (k === 'contact' && v && typeof v === 'object') {
+                    Object.entries(v).forEach(([ck, cv]) => {
+                        const inp = added.querySelector(`[data-field="${ck}"]`);
+                        if (inp) inp.value = cv || '';
+                    });
+                } else {
+                    const inp = added.querySelector(`[data-field="${k}"]`);
+                    if (inp) inp.value = v || '';
+                }
+            });
+            // bind remove
+            const btn = added.querySelector('.btn-remove-guardian');
+            if (btn) btn.addEventListener('click', () => added.remove());
+        }
+
+        function load() {
+            try {
+                return JSON.parse(localStorage.getItem(KEY) || '[]');
+            } catch (e) {
+                console.error(e);
+                return [];
+            }
+        }
+
+        function save(list) {
+            localStorage.setItem(KEY, JSON.stringify(list));
+        }
+
+        function nextId(list) {
+            const nums = list.map(x => Number(x.id)).filter(n => !isNaN(n));
+            return nums.length ? Math.max(...nums) + 1 : 1;
+        }
+
+        function render() {
+            const list = load();
+            const container = document.getElementById('studentsList');
+            const empty = document.getElementById('emptyState');
+            const count = document.getElementById('studentsCount');
+            container.innerHTML = '';
+            count.textContent = `${list.length} alunos`;
+            if (list.length === 0) {
+                empty.style.display = 'block';
+                return;
+            } else {
+                empty.style.display = 'none';
+            }
+
+            // Build a compact table instead of cards
+            const rows = list.map(s => {
+                const city = s.address ? escape(s.address.city || '') : '—';
+                const phone = s.contact ? ('+' + escape(s.contact.ddd || '') + ' ' + escape(s.contact.phone || '')) : '—';
+                return `
+        <tr>
+          <td class="align-middle">${escape(s.id)}</td>
+          <td class="align-middle">${escape(s.name)} ${escape(s.surname || '')}</td>
+          <td class="align-middle">${city}</td>
+          <td class="align-middle">${phone}</td>
+          <td class="text-end align-middle">
+            <button class="btn btn-sm btn-outline-secondary btn-edit me-2" data-id="${s.id}" title="Editar"><i class="bi bi-pencil"></i></button>
+            <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${s.id}" title="Remover"><i class="bi bi-trash"></i></button>
+          </td>
+        </tr>
+      `;
+            }).join('');
+
+            container.innerHTML = `
+      <div class="table-responsive">
+        <table class="table table-hover table-sm">
+          <thead>
+            <tr>
+              <th style="width:8%">ID</th>
+              <th>Name</th>
+              <th style="width:20%">City</th>
+              <th style="width:18%">Phone</th>
+              <th style="width:10%" class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+            // attach delete handlers
+            document.querySelectorAll('.btn-delete').forEach(b => b.addEventListener('click', (ev) => {
+                const id = ev.currentTarget.dataset.id;
+                if (!confirm('Remover estudante #' + id + '?')) return;
+                let list = load();
+                list = list.filter(x => String(x.id) !== String(id));
+                save(list);
+                render();
+            }));
+
+            // attach edit handlers for the rows
+            attachRowActions();
+        }
+
+        function escape(str) {
+            if (str === null || str === undefined) return '';
+            return String(str).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+        }
+
+        // seed sample if none
+        if (!localStorage.getItem(KEY)) {
+            const sample = [{
+                id: 1,
+                name: 'Ana',
+                surname: 'Costa',
+                address: {street: 'Rua A', city: 'Cidade'},
+                contact: {ddd: 11, phone: '99999-0000'}
+            }, {id: 2, name: 'João', surname: 'Silva'}];
+            save(sample);
+        }
+
+        // open add modal
+        const formEl = document.getElementById('studentForm');
+        const modalTitle = document.querySelector('#addStudentModal .modal-title');
+        const saveBtn = document.getElementById('btnSaveStudent');
+
+        function openAddModal() {
+            formEl.reset();
+            formEl.elements['id'].value = '';
+            // inject templates for student fields
+            cloneInto('tmpl-personal-data', 'personal-block');
+            cloneInto('tmpl-address', 'address-block');
+            cloneInto('tmpl-contact', 'contact-block');
+            // clear guardians
+            const guardiansContainer = document.getElementById('guardians-block');
+            if (guardiansContainer) guardiansContainer.innerHTML = '';
+            // bind adds guardian button
+            const addBtn = document.getElementById('btnAddGuardian');
+            if (addBtn) {
+                addBtn.onclick = () => addGuardianRow({});
+            }
+            // ensure no guardian rows on create
+            document.getElementById('contact-block').nextElementSibling && null;
+            modalTitle.textContent = 'Adicionar Estudante';
+            saveBtn.textContent = 'Salvar';
+            addModal.show();
+        }
+
+        document.getElementById('btnOpenAdd').addEventListener('click', openAddModal);
+        document.getElementById('emptyAdd').addEventListener('click', openAddModal);
+
+        // save student
+        document.getElementById('btnSaveStudent').addEventListener('click', () => {
+            const fd = new FormData(formEl);
+            const name = fd.get('name')?.trim();
+            if (!name) {
+                alert('Nome é obrigatório');
+                return;
+            }
+
+            const idVal = fd.get('id')?.trim();
+            const list = load();
+
+            if (idVal) {
+                // update existing
+                const idx = list.findIndex(s => String(s.id) === String(idVal));
+                if (idx === -1) {
+                    alert('Estudante não encontrado para editar.');
+                    addModal.hide();
+                    render();
+                    return;
+                }
+                list[idx].name = name;
+                list[idx].surname = fd.get('surname')?.trim() || '';
+                const street = fd.get('street')?.trim();
+                if (street) {
+                    list[idx].address = {
+                        street: street,
+                        number: fd.get('number')?.trim() || '',
+                        city: fd.get('city')?.trim() || ''
+                    };
+                } else {
+                    list[idx].address = null;
+                }
+                const phone = fd.get('phone')?.trim();
+                if (phone) {
+                    list[idx].contact = {ddd: fd.get('ddd')?.trim() || '', phone: phone};
+                } else {
+                    list[idx].contact = null;
+                }
+                // collect guardians from guardians-block
+                const guardiansCollected = [];
+                document.querySelectorAll('#guardians-block > .guardian-full').forEach(row => {
+                    const nameG = row.querySelector('[data-field="name"]')?.value.trim() || '';
+                    const surnameG = row.querySelector('[data-field="surname"]')?.value.trim() || '';
+                    const addr = {};
+                    ['street', 'number', 'city', 'district', 'complement', 'zip_code', 'state', 'country'].forEach(k => {
+                        const i = row.querySelector(`[data-field="${k}"]`);
+                        if (i && i.value.trim()) addr[k] = i.value.trim();
+                    });
+                    const contact = {};
+                    ['ddd', 'phone', 'whatsapp', 'email'].forEach(k => {
+                        const i = row.querySelector(`[data-field="${k}"]`);
+                        if (i && i.value.trim()) contact[k] = i.value.trim();
+                    });
+                    const gobj = {};
+                    if (nameG) gobj.name = nameG;
+                    if (surnameG) gobj.surname = surnameG;
+                    if (Object.keys(addr).length) gobj.address = addr;
+                    if (Object.keys(contact).length) gobj.contact = contact;
+                    if (Object.keys(gobj).length) guardiansCollected.push(gobj);
+                });
+                list[idx].guardians = guardiansCollected;
+                save(list);
+                addModal.hide();
+                render();
+                return;
+            }
+
+            // create new
+            const id = nextId(list);
+            const student = {id: id, name: name, surname: fd.get('surname')?.trim() || ''};
+            const street = fd.get('street')?.trim();
+            if (street) {
+                student.address = {
+                    street: street,
+                    number: fd.get('number')?.trim() || '',
+                    city: fd.get('city')?.trim() || ''
+                };
+            }
+            const phone = fd.get('phone')?.trim();
+            if (phone) {
+                student.contact = {ddd: fd.get('ddd')?.trim() || '', phone: phone};
+            }
+            // collect guardians on create
+            const guardiansCollectedNew = [];
+            document.querySelectorAll('#guardians-block > .guardian-full').forEach(row => {
+                const nameG = row.querySelector('[data-field="name"]')?.value.trim() || '';
+                const surnameG = row.querySelector('[data-field="surname"]')?.value.trim() || '';
+                const addr = {};
+                ['street', 'number', 'city', 'district', 'complement', 'zip_code', 'state', 'country'].forEach(k => {
+                    const i = row.querySelector(`[data-field="${k}"]`);
+                    if (i && i.value.trim()) addr[k] = i.value.trim();
+                });
+                const contact = {};
+                ['ddd', 'phone', 'whatsapp', 'email'].forEach(k => {
+                    const i = row.querySelector(`[data-field="${k}"]`);
+                    if (i && i.value.trim()) contact[k] = i.value.trim();
+                });
+                const gobj = {};
+                if (nameG) gobj.name = nameG;
+                if (surnameG) gobj.surname = surnameG;
+                if (Object.keys(addr).length) gobj.address = addr;
+                if (Object.keys(contact).length) gobj.contact = contact;
+                if (Object.keys(gobj).length) guardiansCollectedNew.push(gobj);
+            });
+            if (guardiansCollectedNew.length) student.guardians = guardiansCollectedNew;
+            list.push(student);
+            save(list);
+            addModal.hide();
+            render();
+        });
+
+        // attach edit handlers will be added after render via delegation; define handler function
+        function attachRowActions() {
+            // pega o botão de editar
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    const list = load();
+                    const s = list.find(x => String(x.id) === String(id));
+                    if (!s) return;
+
+                    formEl.reset();
+                    formEl.elements['id'].value = s.id;
+
+                    // injeta templates
+                    cloneInto('tmpl-personal-data', 'personal-block');
+                    cloneInto('tmpl-address', 'address-block');
+                    cloneInto('tmpl-contact', 'contact-block');
+
+                    // popula personal
+                    formEl.querySelector('[name="name"]').value = s.name || '';
+                    formEl.querySelector('[name="surname"]').value = s.surname || '';
+
+                    // popula address
+                    if (s.address) {
+                        for (const k in s.address) {
+                            if (formEl.querySelector(`[name="${k}"]`)) {
+                                formEl.querySelector(`[name="${k}"]`).value = s.address[k] || '';
+                            }
+                        }
+                    }
+
+                    // popula contact
+                    if (s.contact) {
+                        for (const k in s.contact) {
+                            if (formEl.querySelector(`[name="${k}"]`)) {
+                                formEl.querySelector(`[name="${k}"]`).value = s.contact[k] || '';
+                            }
+                        }
+                    }
+
+                    // limpa e recria guardians
+                    const guardiansContainer = document.getElementById('guardians-block');
+                    guardiansContainer.innerHTML = '';
+
+                    if (Array.isArray(s.guardians)) {
+                        s.guardians.forEach(g => addGuardianRow(g));
+                    }
+
+                    document.getElementById('btnAddGuardian').onclick = () => addGuardianRow({});
+
+                    modalTitle.textContent = 'Edit Student';
+                    saveBtn.textContent = 'Update';
+
+                    addModal.show();
+                });
+            });
+
+            // salvar aluno
+            saveBtn.onclick = () => {
+                const list = load();
+                const id = formEl.elements['id'].value;
+
+                const student = {
+                    id: id || nextId(list),
+                    name: formEl.elements['name'].value,
+                    surname: formEl.elements['surname'].value,
+                    address: {},
+                    contact: {},
+                    guardians: []
+                };
+
+                // pega address
+                formEl.querySelectorAll('#address-block input[name]').forEach(inp => {
+                    student.address[inp.name] = inp.value;
+                });
+
+                // pega contact
+                formEl.querySelectorAll('#contact-block input[name]').forEach(inp => {
+                    student.contact[inp.name] = inp.value;
+                });
+
+                // guardians
+                document.querySelectorAll('.guardian-full').forEach(g => {
+                    const gData = {address: {}, contact: {}};
+
+                    g.querySelectorAll('[data-field]').forEach(inp => {
+                        const field = inp.dataset.field;
+                        if (['street', 'number', 'district', 'city', 'complement', 'zip_code', 'state', 'country'].includes(field)) {
+                            gData.address[field] = inp.value;
+                        } else if (['ddd', 'phone', 'whatsapp', 'email'].includes(field)) {
+                            gData.contact[field] = inp.value;
+                        } else {
+                            gData[field] = inp.value;
+                        }
+                    });
+
+                    student.guardians.push(gData);
+                });
+
+                // cria ou atualiza
+                if (id) {
+                    const idx = list.findIndex(x => String(x.id) === String(id));
+                    if (idx > -1) list[idx] = student;
+                } else {
+                    list.push(student);
+                }
+
+                save(list);
+                addModal.hide();
+                render();
+            };
+        }
+
+        // initial render: first attempt to load external templates (if available), then render
+        document.addEventListener('DOMContentLoaded', async () => {
+            await tryLoadExternalTemplates();
+            render();
+            attachRowActions();
+        });
+    })();
+
+</script>
+</body>
+</html>

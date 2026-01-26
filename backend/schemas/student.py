@@ -39,7 +39,6 @@ class SchemaStudentView(BaseModel):
     id: int
     name: str = Field(..., json_schema_extra={"example": "Ana"})
     surname: str = Field(..., json_schema_extra={"example": "Costa"})
-    full_name: Optional[str] = Field(None, json_schema_extra={"example": "Ana Costa"})
     address: SchemaAddressView
     contact: SchemaContactView
     guardians: List[SchemaGuardianView] = Field(default_factory=list)
@@ -74,7 +73,7 @@ class SchemaStudentCreate(BaseModel):
     surname: str = Field(..., json_schema_extra={"example": "Costa"})
     address: SchemaAddressCreate
     contact: SchemaContactCreate
-    guardians: Union[SchemaGuardianCreate, List[SchemaGuardianCreate]]
+    guardians: Union[List[SchemaGuardianCreate],SchemaGuardianCreate]
 
     model_config = {
         "from_attributes": True

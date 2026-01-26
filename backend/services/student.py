@@ -40,14 +40,14 @@ def update_student_by_id(student_id: int, update_data: dict):
         if not student:
             return False, "Student not found.", None
 
-        if update_data.get("name") is not None:
+        if update_data.get("name") is not None or "":
             student.name = update_data["name"]
-        if update_data.get("surname") is not None:
+        if update_data.get("surname") is not None or "":
             student.surname = update_data["surname"]
 
         addr = update_data.get("address")
         if addr:
-            if student.address is None:
+            if student.address is None or addr == {}:
                 student.address = Address()
             for field, value in addr.items():
                 if value is not None:
@@ -55,10 +55,10 @@ def update_student_by_id(student_id: int, update_data: dict):
 
         contact = update_data.get("contact")
         if contact:
-            if student.contact is None:
+            if student.contact is None or "":
                 student.contact = Contact()
             for field, value in contact.items():
-                if value is not None:
+                if value is not None or "":
                     setattr(student.contact, field, value)
 
         guardian = update_data.get("guardian") or update_data.get("guardians")

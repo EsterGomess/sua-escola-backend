@@ -1,0 +1,74 @@
+/* css */
+  /* Força alinhamento entre campo de busca, ícone e botão "Adicionar" no header */
+  header .container > .d-flex > .d-flex.align-items-center {
+    align-items: center;
+    gap: .5rem;
+  }
+
+  /* Input group: mesma altura do botão */
+  header .container > .d-flex > .d-flex.align-items-center .input-group {
+    display: flex;
+    align-items: center;
+    width: 250px !important;
+    height: 40px !important;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  /* Garante que label que envolve o input não quebre o fluxo */
+  header .container > .d-flex > .d-flex.align-items-center .input-group > label {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  /* Input ocupa 100% da altura do grupo */
+  header .container > .d-flex > .d-flex.align-items-center .input-group .form-control {
+    height: 100% !important;
+    padding: .375rem .75rem !important;
+    line-height: 1.2 !important;
+    box-sizing: border-box !important;
+    border-radius: 6px 0 0 6px !important;
+    vertical-align: middle !important;
+  }
+
+  /* Ícone / botão do input-group com mesma altura */
+  header .container > .d-flex > .d-flex.align-items-center .input-group .input-group-text,
+  header .container > .d-flex > .d-flex.align-items-center .input-group .input-group-text.bg-dark {
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: .375rem .6rem !important;
+    border-left: 0 !important;
+    border-radius: 0 6px 6px 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Botão de adicionar: mesma altura e alinhamento */
+  header .container > .d-flex > .d-flex.align-items-center .btn,
+  header .container > .d-flex > .d-flex.align-items-center > div > .btn {
+    height: 40px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: .375rem .75rem !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Proteção responsiva */
+  @media (max-width: 720px) {
+    header .container > .d-flex > .d-flex.align-items-center .input-group {
+      width: 160px !important;
+      height: 36px !important;
+    }
+    header .container > .d-flex > .d-flex.align-items-center .btn {
+      height: 36px !important;
+      padding: .35rem .6rem !important;
+    }
+  }
